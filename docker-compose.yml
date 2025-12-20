@@ -1,0 +1,37 @@
+# docker-compose.yml (version 3.8)
+version: "3.8"
+
+services:
+  app:
+    # build image from Dockerfile in the repo root
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-2fa-app:latest
+    container_name: 2fa-app
+    ports:
+      - "8080:8080"                # map host 8080 -> container 8080
+    environment:
+      - TZ=UTC
+    # Named volumes for persistent data and cron output
+    volumes:
+      - seed-data:/data            # named volume -> container /data
+      - cron-output:/cron
+      - ./scripts:/app/scripts
+      - ./totp_utils.py:/app/totp_utils.py                # named volume -> container /cron
+      # mount local key files for development (read-only inside container)
+      - ./student_private.pem:/app/student_private.pem:ro
+      - ./student_public.pem:/app/student_public.pem:ro
+      - ./instructor_public.pem:/app/instructor_public.pem:ro
+      # optional: mount api_response.json (for local testing)
+      - ./api_response.json:/app/api_response.json:ro
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+volumes:
+  seed-data:
+  cron-output:

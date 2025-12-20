@@ -1,0 +1,2 @@
+* * * * * root cd /app && python3 -m scripts.log_2fa_cron >> /cron/last_code.txt 2>&1
+
